@@ -54,10 +54,11 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
     setError(null);
     try {
       const todayDate = new Date();
+      const auditPromise = isAdminAny ? api.audit.list({ limit: 6 }).catch(() => []) : Promise.resolve([]);
       const [weekly, todayAtt, auditLogs, monthly] = await Promise.all([
         api.reports.getWeekly(currentWeekStart),
         api.attendance.list({ date: todayKolkata }),
-        api.audit.list({ limit: 6 }),
+        auditPromise,
         api.reports.getMonthly(todayDate.getFullYear(), todayDate.getMonth() + 1),
       ]);
 
@@ -298,14 +299,14 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         </div>
       </div>
 
-      {/* Two Columns: Today's Attendance Snapshot & Approval/Audit Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Today's Attendance Snapshot & Admin Audit Feed */}
+      <div className={`grid grid-cols-1 ${isAdminAny ? 'lg:grid-cols-2' : ''} gap-6`}>
         {/* Today's Attendance Snapshot */}
         <div className="bg-white rounded-xl border border-[#696969]/20 shadow-xs p-5 space-y-3">
           <div className="flex items-center justify-between border-b border-[#696969]/15 pb-2.5">
             <div className="flex items-center space-x-2">
-              <CalendarCheck2 className="w-4 h-4 text-[#456B5A]" />
-              <h2 className="font-bold text-sm text-[#014025]">Today&apos;s Attendance Submissions</h2>
+              <CalendarCheck2 className="w-4 h-4 text-[#0E6037]" />
+              <h2 className="font-bold text-sm text-[#0E6037]">Today&apos;s Attendance Submissions</h2>
             </div>
             <span className="text-xs text-[#696969] font-mono">{formatDateDisplay(todayKolkata)}</span>
           </div>
@@ -346,41 +347,43 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           )}
         </div>
 
-        {/* Recent Audit History & Admin Alterations */}
-        <div className="bg-white rounded-xl border border-[#696969]/20 shadow-xs p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-[#696969]/15 pb-2.5">
-            <div className="flex items-center space-x-2">
-              <ShieldAlert className="w-4 h-4 text-[#456B5A]" />
-              <h2 className="font-bold text-sm text-[#014025]">Recent Audit &amp; Activity Log</h2>
+        {/* Recent Audit History & Admin Alterations — STRICTLY FOR ADMINS ONLY */}
+        {isAdminAny && (
+          <div className="bg-white rounded-xl border border-[#696969]/20 shadow-xs p-5 space-y-3">
+            <div className="flex items-center justify-between border-b border-[#696969]/15 pb-2.5">
+              <div className="flex items-center space-x-2">
+                <ShieldAlert className="w-4 h-4 text-[#0E6037]" />
+                <h2 className="font-bold text-sm text-[#0E6037]">Recent Audit &amp; Activity Log</h2>
+              </div>
+              <button
+                onClick={() => onNavigate && onNavigate('audit')}
+                className="text-xs text-[#0E6037] hover:text-[#0B4D2C] font-semibold flex items-center space-x-1 cursor-pointer"
+              >
+                <span>Full Audit</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <button
-              onClick={() => onNavigate && onNavigate('audit')}
-              className="text-xs text-[#456B5A] hover:text-[#014025] font-semibold flex items-center space-x-1"
-            >
-              <span>Full Audit</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
 
-          {recentAudits.length === 0 ? (
-            <div className="py-8 text-center text-xs text-[#696969]">No recent activity entries recorded.</div>
-          ) : (
-            <div className="space-y-2">
-              {recentAudits.map((log) => (
-                <div key={log.id} className="p-2 rounded-lg border border-[#696969]/15 text-xs space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-[#014025]">{log.action.replace(/_/g, ' ')}</span>
-                    <span className="text-[10px] text-[#696969]">{formatDateDisplay(log.created_at)}</span>
+            {recentAudits.length === 0 ? (
+              <div className="py-8 text-center text-xs text-[#696969]">No recent activity entries recorded.</div>
+            ) : (
+              <div className="space-y-2">
+                {recentAudits.map((log) => (
+                  <div key={log.id} className="p-2 rounded-lg border border-[#696969]/15 text-xs space-y-0.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-800">{log.action.replace(/_/g, ' ')}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">{formatDateDisplay(log.created_at)}</span>
+                    </div>
+                    <div className="text-[11px] text-[#696969]">
+                      By <span className="font-medium text-[#0E6037]">{log.actor_name}</span> ({log.actor_role})
+                      {log.reason && <span className="italic ml-1">— &quot;{log.reason}&quot;</span>}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-[#696969]">
-                    By <span className="font-medium text-[#014025]">{log.actor_name}</span> ({log.actor_role})
-                    {log.reason && <span className="italic ml-1">— &quot;{log.reason}&quot;</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

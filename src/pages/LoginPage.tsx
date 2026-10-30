@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Building2, ShieldCheck, UserCheck, AlertCircle, Lock, Mail, ArrowRight } from 'lucide-react';
+import { CalendarDays, ShieldCheck, UserCheck, AlertCircle, Lock, Mail, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-// Company branding — replace these with your actual assets
-const COMPANY_NAME = 'Acme Labour ERP';
-const COMPANY_LOGO_URL = 'https://placehold.co/120x120/456B5A/FFFFFF?text=Logo';
+// Company branding
+const COMPANY_NAME = 'Solar Designs Pvt Ltd';
+const COMPANY_LOGO_URL = '/assets/aistudio/solar_designs_clean_logo_bf464b07.png';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -44,79 +44,126 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#456B5A]/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#014025]/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#456B5A]/3 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF1ED] via-[#F2F6F3] to-[#E5EFE8] flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden">
+      {/* Decorative ambient sage glows */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#0E6037]/8 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#3B5E4F]/8 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-white/40 rounded-full blur-2xl" />
       </div>
 
-      <div className="w-full max-w-md relative z-10 animate-fade-in-up">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-shadow duration-300 hover:shadow-2xl">
-          {/* Header */}
-          <div className="bg-gradient-to-br from-[#014025] to-[#456B5A] p-8 text-center relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,white_0%,transparent_50%)]" />
-            </div>
-            <div className="relative">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4 transition-transform duration-500 hover:scale-105">
+      <div className="w-full max-w-[430px] relative z-10 animate-fade-in-up">
+        <div className="bg-white rounded-3xl shadow-xl shadow-slate-900/8 border border-[#D8E4DD] overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-950/10">
+          
+          {/* Card Header with Mint Sage Background & Fluid Organic Waves */}
+          <div className="relative pt-8 pb-7 px-6 text-center bg-gradient-to-b from-[#E7F0EB] via-[#EEF5F1] to-[#FAFCFA] border-b border-[#E1ECE5] overflow-hidden">
+            {/* SVG Organic Wave Ribbons in Corners */}
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 430 200"
+              preserveAspectRatio="none"
+            >
+              {/* Top-left sage wave ribbons */}
+              <path
+                d="M-20,-10 C40,40 10,120 -20,130 Z"
+                fill="#5C8E75"
+                opacity="0.22"
+              />
+              <path
+                d="M-30,-20 C60,20 60,95 -10,115 Z"
+                fill="#7BA490"
+                opacity="0.30"
+              />
+              <path
+                d="M-10,-30 C100,0 80,70 10,85 Z"
+                fill="#A6C5B5"
+                opacity="0.38"
+              />
+
+              {/* Bottom-right sage wave ribbons */}
+              <path
+                d="M360,210 C340,150 390,110 440,90 L450,210 Z"
+                fill="#A6C5B5"
+                opacity="0.35"
+              />
+              <path
+                d="M380,210 C360,165 410,125 450,115 L450,210 Z"
+                fill="#7BA490"
+                opacity="0.28"
+              />
+              <path
+                d="M405,210 C390,175 425,145 450,135 L450,210 Z"
+                fill="#5C8E75"
+                opacity="0.20"
+              />
+            </svg>
+
+            <div className="relative z-10 flex flex-col items-center">
+              {/* Circular Wave Logo */}
+              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl flex items-center justify-center p-1 transition-transform duration-300 hover:scale-105">
                 <img
                   src={COMPANY_LOGO_URL}
                   alt={`${COMPANY_NAME} logo`}
-                  className="w-14 h-14 object-contain rounded-lg"
+                  className="w-full h-full object-contain filter drop-shadow-xs"
                 />
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">{COMPANY_NAME}</h1>
-              <p className="text-sm text-white/70 mt-1.5 font-medium">
+
+              {/* Title & Subtitle */}
+              <h1 className="text-2xl sm:text-[25px] font-bold text-slate-800 tracking-tight mt-2.5">
+                {COMPANY_NAME}
+              </h1>
+              <p className="text-sm text-slate-500 font-medium mt-1">
                 Weekly Attendance &amp; Payment System
               </p>
-              <div className="mt-2 inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/10 text-[11px] text-white/80 border border-white/10">
-                <Building2 className="w-3 h-3" />
+
+              {/* Sat - Fri Cycle Badge */}
+              <div className="mt-3.5 inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full bg-[#E2EEE7] text-[#134E35] border border-[#CFE1D6] text-xs font-semibold shadow-2xs">
+                <CalendarDays className="w-3.5 h-3.5 text-[#134E35]" />
                 <span>Sat – Fri Cycle</span>
               </div>
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <form onSubmit={handleSubmit} className="p-7 space-y-4.5 bg-white">
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs flex items-start space-x-2 animate-shake">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-start space-x-2 animate-shake">
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
-            <div className="animate-slide-in" style={{ animationDelay: '0.1s' }}>
-              <label className="block text-xs font-semibold text-[#696969] mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-600">
                 Email Address
               </label>
               <div className="relative group">
-                <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 pointer-events-none transition-colors duration-200 group-focus-within:text-[#456B5A]" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none transition-colors duration-200 group-focus-within:text-[#0E6037]" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.erp"
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50/50 text-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#456B5A]/20 focus:border-[#456B5A] focus:bg-white hover:border-gray-300"
+                  placeholder="admin@company.erp"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm border border-[#D5E0DA] rounded-xl bg-[#F8FAF9] text-slate-800 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:ring-3 focus:ring-[#0E6037]/15 focus:border-[#0E6037] focus:bg-white hover:border-slate-300"
                 />
               </div>
             </div>
 
-            <div className="animate-slide-in" style={{ animationDelay: '0.2s' }}>
-              <label className="block text-xs font-semibold text-[#696969] mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-600">
                 Password
               </label>
               <div className="relative group">
-                <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-2.5 pointer-events-none transition-colors duration-200 group-focus-within:text-[#456B5A]" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none transition-colors duration-200 group-focus-within:text-[#0E6037]" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50/50 text-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#456B5A]/20 focus:border-[#456B5A] focus:bg-white hover:border-gray-300"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm border border-[#D5E0DA] rounded-xl bg-[#F8FAF9] text-slate-800 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:ring-3 focus:ring-[#0E6037]/15 focus:border-[#0E6037] focus:bg-white hover:border-slate-300"
                 />
               </div>
             </div>
@@ -124,10 +171,9 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 px-4 bg-[#014025] hover:bg-[#013520] text-white rounded-lg text-sm font-semibold shadow-md flex items-center justify-center space-x-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden animate-slide-in"
-              style={{ animationDelay: '0.3s' }}
+              className="w-full py-3 px-4 bg-[#0E6037] hover:bg-[#0B4D2C] active:bg-[#083C22] text-white rounded-xl text-sm font-semibold shadow-md shadow-[#0E6037]/20 flex items-center justify-center space-x-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer mt-2"
             >
-              <span className="relative z-10">
+              <span>
                 {isSubmitting ? (
                   <span className="flex items-center space-x-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -138,90 +184,67 @@ export function LoginPage() {
                 )}
               </span>
               {!isSubmitting && (
-                <ArrowRight className="w-4 h-4 relative z-10 transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
               )}
-              <div className="absolute inset-0 bg-[#456B5A] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </button>
           </form>
 
-          {/* Role presets */}
-          <div className="bg-gray-50/80 p-5 border-t border-gray-100">
-            <div className="text-[11px] font-semibold text-[#696969] uppercase tracking-wider mb-3 text-center">
-              Role-Based Access Presets
+          {/* Quick Role Presets for Testing & Demo */}
+          <div className="bg-[#F8FAF9] px-7 py-4.5 border-t border-[#E8EFEA]">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2.5 text-center">
+              Quick Role-Based Access
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => fillCredentials('admin')}
-                className="p-3 border border-gray-200 bg-white hover:bg-[#456B5A]/5 hover:border-[#456B5A]/30 rounded-xl text-left transition-all duration-200 group hover:shadow-sm"
+                className="p-2.5 border border-[#D5E0DA] bg-white hover:bg-[#EBF3EE] hover:border-[#0E6037]/40 rounded-xl text-left transition-all duration-200 group hover:shadow-xs cursor-pointer"
               >
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-gray-800 group-hover:text-[#014025] transition-colors">
-                  <ShieldCheck className="w-4 h-4 text-[#014025]" />
+                <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 group-hover:text-[#0E6037] transition-colors">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0E6037]" />
                   <span>Admin</span>
                 </div>
-                <div className="text-[10px] text-[#696969] truncate mt-1">admin@company.erp</div>
-                <div className="text-[10px] text-[#456B5A] font-mono mt-0.5">Admin@ERP2026!</div>
+                <div className="text-[10px] text-slate-500 truncate mt-0.5">admin@company.erp</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => fillCredentials('staff')}
-                className="p-3 border border-gray-200 bg-white hover:bg-[#456B5A]/5 hover:border-[#456B5A]/30 rounded-xl text-left transition-all duration-200 group hover:shadow-sm"
+                className="p-2.5 border border-[#D5E0DA] bg-white hover:bg-[#EBF3EE] hover:border-[#0E6037]/40 rounded-xl text-left transition-all duration-200 group hover:shadow-xs cursor-pointer"
               >
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-gray-800 group-hover:text-[#014025] transition-colors">
-                  <UserCheck className="w-4 h-4 text-[#456B5A]" />
+                <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 group-hover:text-[#0E6037] transition-colors">
+                  <UserCheck className="w-3.5 h-3.5 text-[#3B5E4F]" />
                   <span>Staff</span>
                 </div>
-                <div className="text-[10px] text-[#696969] truncate mt-1">staff@company.erp</div>
-                <div className="text-[10px] text-[#456B5A] font-mono mt-0.5">Staff@ERP2026!</div>
+                <div className="text-[10px] text-slate-500 truncate mt-0.5">staff@company.erp</div>
               </button>
-            </div>
-
-            <div className="mt-3.5 text-[10px] text-[#696969]/80 text-center leading-relaxed">
-              No public registration. Labourers are count-based and have no login.
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-[#696969]/60 mt-6 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+        <p className="text-center text-xs text-slate-500 mt-5">
           © {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.
         </p>
       </div>
 
-      {/* Custom animations */}
+      {/* Animation helpers */}
       <style>{`
         @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(24px); }
+          from { opacity: 0; transform: translateY(18px); }
           to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slide-in {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
         }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-          20%, 40%, 60%, 80% { transform: translateX(4px); }
+          20%, 60% { transform: translateX(-4px); }
+          40%, 80% { transform: translateX(4px); }
         }
         .animate-fade-in-up {
-          animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .animate-slide-in {
-          opacity: 0;
-          animation: slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .animate-fade-in {
-          opacity: 0;
-          animation: fade-in 0.5s ease forwards;
+          animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .animate-shake {
-          animation: shake 0.4s ease-in-out;
+          animation: shake 0.35s ease-in-out;
         }
       `}</style>
     </div>

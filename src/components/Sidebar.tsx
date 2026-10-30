@@ -188,8 +188,8 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
           icon: <Bell className="w-4 h-4" />,
           badge: unreadNotifs,
         },
-        { id: 'audit', label: 'Audit History', icon: <History className="w-4 h-4" /> },
-        { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
+        { id: 'audit', label: 'Audit History', icon: <History className="w-4 h-4" />, adminOnly: true },
+        { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" />, adminOnly: true },
       ],
     },
   ];
@@ -212,13 +212,17 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
   return (
     <>
       {/* 1. Mobile Top Header Bar */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0B2E21] border-b border-white/10 text-white sticky top-0 z-30 shadow-xs">
+      <header className="md:hidden flex items-center justify-between px-4 py-2.5 bg-[#0B2E21] border-b border-white/10 text-white sticky top-0 z-30 shadow-xs">
         <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#456B5A]/40 border border-emerald-400/30 flex items-center justify-center text-white">
-            <Building2 className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-white p-1 border border-emerald-400/25 shadow-2xs flex items-center justify-center shrink-0">
+            <img
+              src="/assets/aistudio/solar_designs_clean_logo_bf464b07.png"
+              alt="Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
-            <div className="font-bold text-xs tracking-tight text-white leading-tight">Labour ERP</div>
+            <div className="font-bold text-xs tracking-tight text-white leading-tight">Solar Designs Pvt Ltd</div>
             <div className="text-[10px] text-emerald-200/70 font-mono capitalize">
               {user?.role === 'master_admin' ? 'Master Admin' : user?.role === 'secondary_admin' ? 'Manager' : 'Staff'}
             </div>
@@ -251,30 +255,38 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
 
       {/* 2. Desktop & Tablet Sidebar (Collapsible & Categorized) */}
       <aside
-        className={`hidden md:flex flex-col h-screen sticky top-0 bg-[#0B2E21] border-r border-[#456B5A]/25 text-white/80 transition-all duration-250 ease-in-out shrink-0 select-none z-30 ${
+        className={`hidden md:flex flex-col h-screen sticky top-0 bg-[#0B2E21] border-r border-[#1B4B36] text-white/80 transition-all duration-250 ease-in-out shrink-0 select-none z-30 ${
           isCollapsed ? 'w-18' : 'w-64'
         }`}
       >
         {/* Brand Header */}
-        <div className="p-4 border-b border-[#456B5A]/20 flex items-center justify-between">
+        <div className="p-3.5 border-b border-[#1B4B36] flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-lg bg-[#456B5A]/35 border border-emerald-300/25 flex items-center justify-center text-emerald-300 shrink-0">
-                <Building2 className="w-4 h-4" />
+              <div className="w-8.5 h-8.5 rounded-xl bg-white p-1 border border-emerald-400/25 shadow-2xs flex items-center justify-center shrink-0">
+                <img
+                  src="/assets/aistudio/solar_designs_clean_logo_bf464b07.png"
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="min-w-0">
                 <div className="font-bold text-xs text-white tracking-tight leading-tight truncate">
-                  Labour ERP Suite
+                  Solar Designs Pvt Ltd
                 </div>
-                <div className="text-[10px] text-emerald-200/60 font-mono truncate">Saturday–Friday Cycle</div>
+                <div className="text-[10px] text-emerald-200/70 font-mono truncate">Saturday–Friday Cycle</div>
               </div>
             </div>
           )}
 
           {isCollapsed && (
             <div className="w-full flex justify-center">
-              <div className="w-8 h-8 rounded-lg bg-[#456B5A]/35 border border-emerald-300/25 flex items-center justify-center text-emerald-300">
-                <Building2 className="w-4 h-4" />
+              <div className="w-8.5 h-8.5 rounded-xl bg-white p-1 border border-emerald-400/25 shadow-2xs flex items-center justify-center">
+                <img
+                  src="/assets/aistudio/solar_designs_clean_logo_bf464b07.png"
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           )}
@@ -353,7 +365,7 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
                           title={isCollapsed ? item.label : undefined}
                           className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all relative ${
                             isActive
-                              ? 'bg-gradient-to-r from-[#456B5A] to-[#3B5E4F] text-white font-semibold shadow-xs'
+                              ? 'bg-gradient-to-r from-[#0E6037] to-[#156B40] text-white font-semibold shadow-xs'
                               : 'text-white/75 hover:text-white hover:bg-white/8'
                           } ${isCollapsed ? 'justify-center' : ''}`}
                         >
@@ -384,7 +396,7 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
         </nav>
 
         {/* Footer Logout */}
-        <div className="p-3 border-t border-[#456B5A]/20">
+        <div className="p-3 border-t border-[#1B4B36]">
           <button
             onClick={logout}
             className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors ${
@@ -415,12 +427,18 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-              className="relative bg-[#0B2E21] border-t border-[#456B5A]/40 rounded-t-3xl max-h-[85vh] flex flex-col overflow-hidden text-white shadow-2xl"
+              className="relative bg-[#0B2E21] border-t border-[#1B4B36] rounded-t-3xl max-h-[85vh] flex flex-col overflow-hidden text-white shadow-2xl"
             >
               {/* Drawer Handle & Header */}
               <div className="pt-3 pb-2 px-4 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <div className="w-5 h-5 rounded-md bg-white p-0.5 border border-emerald-400/30 flex items-center justify-center shrink-0">
+                    <img
+                      src="/assets/aistudio/solar_designs_clean_logo_bf464b07.png"
+                      alt="Logo"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <span className="font-bold text-sm text-white">Full Application Menu</span>
                 </div>
                 <button
@@ -456,7 +474,7 @@ export function Sidebar({ currentTab, onTabChange }: SidebarProps) {
                               onClick={() => handleSelectTab(item.id)}
                               className={`flex items-center justify-between p-2.5 rounded-xl text-xs font-medium border text-left transition-all ${
                                 isActive
-                                  ? 'bg-[#456B5A] text-white border-emerald-400 font-semibold shadow-xs'
+                                  ? 'bg-[#0E6037] text-white border-emerald-400 font-semibold shadow-xs'
                                   : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
                               }`}
                             >

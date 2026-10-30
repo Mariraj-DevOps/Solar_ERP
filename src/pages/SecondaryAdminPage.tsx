@@ -6,6 +6,7 @@ import {
   Settings,
   Check,
   Plus,
+  Pencil,
   Trash2,
   AlertCircle,
   Building,
@@ -23,6 +24,7 @@ export function SecondaryAdminPage() {
 
   // Assignment Modal
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<any | null>(null);
   const [selectedAdminId, setSelectedAdminId] = useState('');
   const [selectedStaffId, setSelectedStaffId] = useState('');
   const [canViewReports, setCanViewReports] = useState(true);
@@ -54,6 +56,7 @@ export function SecondaryAdminPage() {
   }, []);
 
   const openAssignModal = (adminId?: string) => {
+    setEditingAssignment(null);
     if (adminId) setSelectedAdminId(adminId);
     else if (secAdmins.length > 0) setSelectedAdminId(secAdmins[0].id);
     if (allStaff.length > 0) setSelectedStaffId(allStaff[0].id);
@@ -62,6 +65,18 @@ export function SecondaryAdminPage() {
     setCanEditAttendance(true);
     setCanEditFinance(false);
     setAllowedModules(['weekly_payments', 'petty_cash']);
+    setModalOpen(true);
+  };
+
+  const openEditAssignModal = (adminId: string, assign: any) => {
+    setSelectedAdminId(adminId);
+    setSelectedStaffId(assign.staff_user_id);
+    setCanViewReports(Boolean(assign.can_view_reports));
+    setCanApproveAttendance(Boolean(assign.can_approve_attendance));
+    setCanEditAttendance(Boolean(assign.can_edit_attendance));
+    setCanEditFinance(Boolean(assign.can_edit_finance));
+    setAllowedModules(assign.allowedFinancialModules || ['weekly_payments', 'petty_cash']);
+    setEditingAssignment(assign);
     setModalOpen(true);
   };
 
@@ -204,7 +219,7 @@ export function SecondaryAdminPage() {
                           <th className="py-2.5 px-3 text-center">Edit Attendance</th>
                           <th className="py-2.5 px-3">Permitted Financial Modules</th>
                           <th className="py-2.5 px-3 text-center">Edit Finance</th>
-                          <th className="py-2.5 px-2 text-center w-8"></th>
+                          <th className="py-2.5 px-2 text-center w-16">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#696969]/15">
@@ -255,12 +270,24 @@ export function SecondaryAdminPage() {
                               )}
                             </td>
                             <td className="py-2.5 px-2 text-center">
-                              <button
-                                onClick={() => handleRemoveAssignment(admin.id, assign.staff_user_id)}
-                                className="text-[#696969] hover:text-red-600 p-1"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex items-center justify-center space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditAssignModal(admin.id, assign)}
+                                  className="text-[#0E6037] hover:text-[#0B4D2C] p-1.5 rounded-md hover:bg-[#0E6037]/10 transition-colors cursor-pointer"
+                                  title="Edit Scope Permissions"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveAssignment(admin.id, assign.staff_user_id)}
+                                  className="text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-50 transition-colors cursor-pointer"
+                                  title="Remove Assignment"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -278,9 +305,9 @@ export function SecondaryAdminPage() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl border border-[#696969]/20 w-full max-w-lg overflow-hidden">
-            <div className="px-5 py-3.5 bg-[#014025] text-white font-bold text-sm flex items-center justify-between">
-              <span>Configure Staff Management &amp; Permissions</span>
-              <button onClick={() => setModalOpen(false)} className="text-white/70 hover:text-white">
+            <div className="px-5 py-3.5 bg-[#0E6037] text-white font-bold text-sm flex items-center justify-between">
+              <span>{editingAssignment ? `Edit Scope Permissions: ${editingAssignment.staff_name}` : 'Configure Staff Management & Permissions'}</span>
+              <button onClick={() => setModalOpen(false)} className="text-white/70 hover:text-white cursor-pointer">
                 ✕
               </button>
             </div>
@@ -414,7 +441,7 @@ export function SecondaryAdminPage() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="px-3 py-1.5 text-xs border border-[#696969]/30 rounded-md text-[#696969] hover:bg-[#696969]/10"
+                className="px-3 py-1.5 text-xs border border-[#696969]/30 rounded-lg text-[#696969] hover:bg-[#696969]/10 cursor-pointer"
               >
                 Cancel
               </button>
@@ -422,9 +449,9 @@ export function SecondaryAdminPage() {
                 type="button"
                 onClick={handleSaveAssignment}
                 disabled={isSubmitting}
-                className="px-4 py-1.5 bg-[#014025] hover:bg-[#014025]/85 text-white rounded-md text-xs font-semibold shadow-xs disabled:opacity-50"
+                className="px-4 py-1.5 bg-[#0E6037] hover:bg-[#0B4D2C] text-white rounded-lg text-xs font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {isSubmitting ? 'Saving...' : 'Save Permissions'}
+                {isSubmitting ? 'Saving...' : editingAssignment ? 'Update Scope Permissions' : 'Save Permissions'}
               </button>
             </div>
           </div>

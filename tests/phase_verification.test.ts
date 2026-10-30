@@ -287,4 +287,108 @@ describe('Phase 2 & Comprehensive ERP Verification Suite', () => {
     // Cleanup
     db.prepare('DELETE FROM attachments WHERE id = ?').run(attachId);
   });
+
+  it('9. Labour Category Management: Edit and Delete with reference checks', () => {
+    const catId = `cat-test-${Date.now()}`;
+    // 1. Create test category
+    db.prepare(`
+      INSERT INTO labour_categories (id, name, code, default_rate, rate_type, display_order, is_shared, owner_user_id, created_at)
+      VALUES (?, 'Test Welder', 'TWELD', 1250, 'daily', 99, 1, 'usr-admin-01', datetime('now'))
+    `).run(catId);
+
+    let cat = db.prepare('SELECT * FROM labour_categories WHERE id = ?').get(catId) as any;
+    expect(cat.name).toBe('Test Welder');
+    expect(cat.default_rate).toBe(1250);
+
+    // 2. Edit test category
+    db.prepare(`
+      UPDATE labour_categories
+      SET name = 'Senior Welder', default_rate = 1500, rate_type = 'hourly'
+      WHERE id = ?
+    `).run(catId);
+
+    cat = db.prepare('SELECT * FROM labour_categories WHERE id = ?').get(catId) as any;
+    expect(cat.name).toBe('Senior Welder');
+    expect(cat.default_rate).toBe(1500);
+    expect(cat.rate_type).toBe('hourly');
+
+    // 3. Delete category
+    db.prepare('DELETE FROM labour_categories WHERE id = ?').run(catId);
+    const checkDeleted = db.prepare('SELECT id FROM labour_categories WHERE id = ?').get(catId);
+    expect(checkDeleted).toBeUndefined();
+  });
+
+  it('10. Weekly Payment Recording by Staff & Admin Override Workflow', () => {
+    const pmtId = `pmt-test-${Date.now()}`;
+    const weekStart = '2026-10-17';
+    const teamId = 'team-heeralal';
+    const staffId = 'usr-staff-01';
+
+    // Staff records initial settlement
+    db.prepare(`
+      INSERT OR REPLACE INTO weekly_payments (
+        id, week_start_date, team_id, staff_user_id, gross_amount, charges_amount,
+        deductions_amount, net_payable, amount_paid, status, payment_date,
+        payment_method, voucher_ref, marked_by, marked_by_name, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, 50000, 2000, 5000, 47000, 30000, 'Partially Paid', '2026-10-23',
+        'Bank Transfer', 'VOUCH-STAFF-01', 'usr-staff-01', 'Staff Member', datetime('now'), datetime('now'))
+    `).run(pmtId, weekStart, teamId, staffId);
+
+    let record = db.prepare('SELECT * FROM weekly_payments WHERE id = ?').get(pmtId) as any;
+    expect(record.status).toBe('Partially Paid');
+    expect(record.amount_paid).toBe(30000);
+    expect(record.marked_by).toBe('usr-staff-01');
+
+    // Admin overrides payment to full settlement
+    db.prepare(`
+      UPDATE weekly_payments
+      SET amount_paid = 47000, status = 'Paid', voucher_ref = 'CHQ-ADMIN-9901',
+          marked_by = 'usr-admin-01', marked_by_name = 'ERP Administrator', updated_at = datetime('now')
+      WHERE id = ?
+    `).run(pmtId);
+
+    record = db.prepare('SELECT * FROM weekly_payments WHERE id = ?').get(pmtId) as any;
+    expect(record.status).toBe('Paid');
+    expect(record.amount_paid).toBe(47000);
+    expect(record.voucher_ref).toBe('CHQ-ADMIN-9901');
+    expect(record.marked_by).toBe('usr-admin-01');
+
+    // Cleanup
+    db.prepare('DELETE FROM weekly_payments WHERE id = ?').run(pmtId);
+  });
+
+  it('11. Manager Scope Assignment Editing & Permission Updates', () => {
+    const assignId = `assign-test-${Date.now()}`;
+    const secAdminId = 'usr-secadmin-01';
+    const staffId = 'usr-staff-01';
+
+    // 1. Initial creation
+    db.prepare(`
+      INSERT OR REPLACE INTO secondary_admin_assignments (
+        id, secondary_admin_id, staff_user_id, can_view_reports, can_approve_attendance,
+        can_edit_attendance, allowed_financial_modules_json, can_edit_finance, can_view_details, created_at, updated_at
+      ) VALUES (?, ?, ?, 1, 0, 0, '["weekly_payments"]', 0, 1, datetime('now'), datetime('now'))
+    `).run(assignId, secAdminId, staffId);
+
+    let assign = db.prepare('SELECT * FROM secondary_admin_assignments WHERE id = ?').get(assignId) as any;
+    expect(assign.can_approve_attendance).toBe(0);
+    expect(assign.can_edit_finance).toBe(0);
+
+    // 2. Edit assignment permissions (toggle approve and finance)
+    db.prepare(`
+      UPDATE secondary_admin_assignments
+      SET can_approve_attendance = 1, can_edit_attendance = 1, can_edit_finance = 1,
+          allowed_financial_modules_json = '["weekly_payments","petty_cash"]', updated_at = datetime('now')
+      WHERE id = ?
+    `).run(assignId);
+
+    assign = db.prepare('SELECT * FROM secondary_admin_assignments WHERE id = ?').get(assignId) as any;
+    expect(assign.can_approve_attendance).toBe(1);
+    expect(assign.can_edit_attendance).toBe(1);
+    expect(assign.can_edit_finance).toBe(1);
+    expect(assign.allowed_financial_modules_json).toContain('petty_cash');
+
+    // Cleanup
+    db.prepare('DELETE FROM secondary_admin_assignments WHERE id = ?').run(assignId);
+  });
 });

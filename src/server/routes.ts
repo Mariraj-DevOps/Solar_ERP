@@ -567,6 +567,95 @@ apiRouter.post('/categories', requireAuth, (req: Request, res: Response) => {
   }
 });
 
+apiRouter.put('/categories/:id', requireAuth, (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name, code, defaultRate, rateType, displayOrder, isShared } = req.body;
+
+  const existing = db.prepare('SELECT * FROM labour_categories WHERE id = ?').get(id) as any;
+  if (!existing) {
+    return res.status(404).json({ error: 'Category not found.' });
+  }
+
+  if (!isAdminAny(req.user) && existing.owner_user_id !== req.user!.id) {
+    return res.status(403).json({ error: 'Permission denied to edit this category.' });
+  }
+
+  const updatedName = name ? name.trim() : existing.name;
+  const updatedCode = code ? code.toUpperCase().trim() : existing.code;
+  const updatedRate = defaultRate !== undefined ? Number(defaultRate) || 0 : existing.default_rate;
+  const updatedRateType = rateType || existing.rate_type;
+  const updatedOrder = displayOrder !== undefined ? Number(displayOrder) || 0 : existing.display_order;
+  const updatedShared = isMasterAdmin(req.user) ? (isShared !== undefined ? (isShared ? 1 : 0) : existing.is_shared) : existing.is_shared;
+
+  try {
+    db.prepare(`
+      UPDATE labour_categories
+      SET name = ?, code = ?, default_rate = ?, rate_type = ?, display_order = ?, is_shared = ?
+      WHERE id = ?
+    `).run(updatedName, updatedCode, updatedRate, updatedRateType, updatedOrder, updatedShared, id);
+
+    logAudit({
+      actorId: req.user!.id,
+      actorName: req.user!.fullName,
+      actorRole: req.user!.role,
+      action: 'UPDATE_CATEGORY',
+      entityType: 'labour_categories',
+      entityId: id,
+      previousValues: existing,
+      newValues: { name: updatedName, code: updatedCode, defaultRate: updatedRate, rateType: updatedRateType },
+    });
+
+    res.json({ id, name: updatedName, code: updatedCode, defaultRate: updatedRate, rateType: updatedRateType, isShared: updatedShared });
+  } catch (err: any) {
+    if (err.message && err.message.includes('UNIQUE constraint failed')) {
+      return res.status(400).json({ error: 'A category with this code already exists.' });
+    }
+    res.status(500).json({ error: err.message || 'Failed to update category.' });
+  }
+});
+
+apiRouter.delete('/categories/:id', requireAuth, (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const existing = db.prepare('SELECT * FROM labour_categories WHERE id = ?').get(id) as any;
+  if (!existing) {
+    return res.status(404).json({ error: 'Category not found.' });
+  }
+
+  if (!isAdminAny(req.user) && existing.owner_user_id !== req.user!.id) {
+    return res.status(403).json({ error: 'Permission denied to delete this category.' });
+  }
+
+  // Check if category is used in existing attendance lines
+  const usedInAttendance = db.prepare('SELECT COUNT(*) as count FROM attendance_lines WHERE category_id = ?').get(id) as { count: number };
+  if (usedInAttendance && usedInAttendance.count > 0) {
+    return res.status(400).json({
+      error: `Cannot delete category "${existing.name}" because it is referenced in ${usedInAttendance.count} attendance line(s). You can edit its rate or name instead.`,
+    });
+  }
+
+  try {
+    // Delete any template associations
+    db.prepare('DELETE FROM team_role_templates WHERE category_id = ?').run(id);
+
+    db.prepare('DELETE FROM labour_categories WHERE id = ?').run(id);
+
+    logAudit({
+      actorId: req.user!.id,
+      actorName: req.user!.fullName,
+      actorRole: req.user!.role,
+      action: 'DELETE_CATEGORY',
+      entityType: 'labour_categories',
+      entityId: id,
+      previousValues: existing,
+    });
+
+    res.json({ success: true, message: `Category "${existing.name}" deleted successfully.` });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to delete category.' });
+  }
+});
+
 // =========================================================================
 // 6. TEAMS & TEMPLATES (WITH STAFF ISOLATION)
 // =========================================================================
@@ -1861,8 +1950,8 @@ apiRouter.get('/payments', requireAuth, (req: Request, res: Response) => {
   res.json(payments);
 });
 
-// Mark as Paid or Partial Payment for a Team's Weekly Report
-apiRouter.post('/payments/mark-paid', requireAuth, requireAdmin, (req: Request, res: Response) => {
+// Mark as Paid or Partial Payment for a Team's Weekly Report (Accessible by Staff for their records, and Admin with override authority)
+apiRouter.post('/payments/mark-paid', requireAuth, (req: Request, res: Response) => {
   const {
     weekStartDate,
     teamId,
@@ -1883,6 +1972,11 @@ apiRouter.post('/payments/mark-paid', requireAuth, requireAdmin, (req: Request, 
     return res.status(400).json({ error: 'Week, team, staff, and payment amount are required.' });
   }
 
+  // Permission check: Staff can update payment for their own records; Secondary Admin for their scope; Master Admin for anyone
+  if (!isAdminAny(req.user) && req.user!.id !== staffUserId) {
+    return res.status(403).json({ error: 'Permission denied to record payment for this staff account.' });
+  }
+
   const net = round2(Number(netPayable));
   const paid = round2(Number(amountPaid));
   let status = 'Pending';
@@ -1896,6 +1990,7 @@ apiRouter.post('/payments/mark-paid', requireAuth, requireAdmin, (req: Request, 
 
   const id = `pmt-${weekStartDate}-${teamId}-${staffUserId}`;
   const now = new Date().toISOString();
+  const isOverride = isAdminAny(req.user) && req.user!.id !== staffUserId;
 
   db.prepare(`
     INSERT INTO weekly_payments (
@@ -1942,7 +2037,7 @@ apiRouter.post('/payments/mark-paid', requireAuth, requireAdmin, (req: Request, 
 
   createNotification({
     userId: staffUserId,
-    title: 'Payment Status Updated',
+    title: isOverride ? 'Payment Override Recorded' : 'Payment Status Updated',
     message: `Payment for week starting ${weekStartDate} has been recorded as ${status} (₹${paid} settled).`,
     type: 'payment',
   });
@@ -1951,10 +2046,11 @@ apiRouter.post('/payments/mark-paid', requireAuth, requireAdmin, (req: Request, 
     actorId: req.user!.id,
     actorName: req.user!.fullName,
     actorRole: req.user!.role,
-    action: 'MARK_WEEKLY_PAYMENT',
+    action: isOverride ? 'ADMIN_OVERRIDE_PAYMENT' : 'MARK_WEEKLY_PAYMENT',
     entityType: 'weekly_payments',
     entityId: id,
     newValues: { status, amountPaid: paid, netPayable: net, voucherRef },
+    reason: isOverride ? 'Admin payment override / settlement modification' : 'Payment recorded by operations staff',
   });
 
   res.json({ success: true, status, amountPaid: paid, netPayable: net, message: `Payment recorded as ${status}.` });
@@ -2679,27 +2775,22 @@ apiRouter.get('/reports/monthly', requireAuth, (req: Request, res: Response) => 
 // =========================================================================
 // 17. AUDIT LOGS & SETTINGS
 // =========================================================================
-apiRouter.get('/audit', requireAuth, (req: Request, res: Response) => {
+apiRouter.get('/audit', requireAuth, requireAdmin, (req: Request, res: Response) => {
   const { limit, entityType, actorId } = req.query;
   const lim = parseInt(String(limit), 10) || 100;
 
   let query = 'SELECT * FROM audit_logs';
   const conditions: string[] = [];
   const params: unknown[] = [];
-
-  // Scoping: Staff cannot modify audit and sees only their actions
-  if (!isAdminAny(req.user)) {
+  // Optional filters for actorId and entityType
+  if (actorId) {
     conditions.push('actor_id = ?');
-    params.push(req.user!.id);
+    params.push(actorId);
   }
 
   if (entityType) {
     conditions.push('entity_type = ?');
     params.push(entityType);
-  }
-  if (actorId && isMasterAdmin(req.user)) {
-    conditions.push('actor_id = ?');
-    params.push(actorId);
   }
 
   if (conditions.length > 0) {

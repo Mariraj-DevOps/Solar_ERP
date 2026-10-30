@@ -334,14 +334,22 @@ export function PaymentTrackerPage() {
                         )}
                       </td>
                       <td className="py-2.5 px-3 text-right">
-                        {isAdminAny && (
-                          <button
-                            onClick={() => openMarkPaidDialog(record)}
-                            className="px-2.5 py-1 bg-[#456B5A] hover:bg-[#014025] text-white rounded text-xs font-medium shadow-xs transition-colors"
-                          >
-                            {record.status === 'Paid' ? 'Update Settlement' : 'Mark as Paid'}
-                          </button>
-                        )}
+                        <button
+                          onClick={() => openMarkPaidDialog(record)}
+                          className={`px-2.5 py-1 text-white rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer ${
+                            record.status === 'Paid'
+                              ? isAdminAny
+                                ? 'bg-amber-700 hover:bg-amber-800'
+                                : 'bg-[#0E6037] hover:bg-[#0B4D2C]'
+                              : 'bg-[#0E6037] hover:bg-[#0B4D2C]'
+                          }`}
+                        >
+                          {record.status === 'Paid'
+                            ? isAdminAny
+                              ? 'Admin Override'
+                              : 'Update Settlement'
+                            : 'Mark as Paid'}
+                        </button>
                       </td>
                     </tr>
                   );
@@ -356,9 +364,13 @@ export function PaymentTrackerPage() {
       {markPaidModalOpen && activeRecord && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl border border-[#696969]/20 w-full max-w-lg overflow-hidden">
-            <div className="px-5 py-3.5 bg-[#014025] text-white font-bold text-sm flex items-center justify-between">
-              <span>Weekly Payment Settlement</span>
-              <button onClick={() => setMarkPaidModalOpen(false)} className="text-white/70 hover:text-white">
+            <div className="px-5 py-3.5 bg-[#0E6037] text-white font-bold text-sm flex items-center justify-between">
+              <span>
+                {isAdminAny && activeRecord.status === 'Paid'
+                  ? 'Weekly Payment Settlement (Admin Override)'
+                  : 'Weekly Payment Settlement'}
+              </span>
+              <button onClick={() => setMarkPaidModalOpen(false)} className="text-white/70 hover:text-white cursor-pointer">
                 ✕
               </button>
             </div>
@@ -449,7 +461,7 @@ export function PaymentTrackerPage() {
               <button
                 type="button"
                 onClick={() => setMarkPaidModalOpen(false)}
-                className="px-3 py-1.5 text-xs border border-[#696969]/30 rounded-md text-[#696969] hover:bg-[#696969]/10"
+                className="px-3 py-1.5 text-xs border border-[#696969]/30 rounded-lg text-[#696969] hover:bg-[#696969]/10 cursor-pointer"
               >
                 Cancel
               </button>
@@ -457,9 +469,13 @@ export function PaymentTrackerPage() {
                 type="button"
                 onClick={handleMarkPaidSubmit}
                 disabled={isSubmitting}
-                className="px-4 py-1.5 bg-[#014025] hover:bg-[#014025]/85 text-white rounded-md text-xs font-semibold shadow-xs disabled:opacity-50"
+                className="px-4 py-1.5 bg-[#0E6037] hover:bg-[#0B4D2C] text-white rounded-lg text-xs font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {isSubmitting ? 'Recording...' : 'Confirm Payment'}
+                {isSubmitting
+                  ? 'Recording...'
+                  : isAdminAny && activeRecord.status === 'Paid'
+                  ? 'Confirm Admin Override'
+                  : 'Confirm Payment'}
               </button>
             </div>
           </div>
